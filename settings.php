@@ -29,7 +29,7 @@ $ADMIN->add('editoratto', new admin_category('atto_helixatto', new lang_string('
 
 $settings = new admin_settingpage('atto_helixatto_settings', new lang_string('settings', 'atto_helixatto'));
 if ($ADMIN->fulltree) {
-    $options = array(0 => new lang_string("no"), 1 => new lang_string("yes"));
+    $options = [0 => new lang_string("no"), 1 => new lang_string("yes")];
     $hidesetting = new admin_setting_configselect('atto_helixatto/hideinsert',
                                               new lang_string('hideinsert', 'atto_helixatto'),
                                               new lang_string('hideinsert_desc', 'atto_helixatto'),
@@ -37,7 +37,7 @@ if ($ADMIN->fulltree) {
                                               $options);
     $settings->add($hidesetting);
 
-    $options = array(0 => new lang_string("no"));
+    $options = [0 => new lang_string("no")];
     if (atto_helixatto_has_filter()) {
         $options[1] = new lang_string("yes");
     }

@@ -29,17 +29,18 @@ require_once($CFG->dirroot.'/lib/filterlib.php');
 
 /**
  * Initialise this plugin
- * @param string $elementid
  */
 function atto_helixatto_strings_for_js() {
     global $PAGE;
 
-    $PAGE->requires->strings_for_js(array('insert', 'cancel', 'dialogtitle', 'showvideo', 'iframe', 'thumbnail', 'link', 'newtab', 'inserttype'),
-        'atto_helixatto');
+    $PAGE->requires->strings_for_js(
+        ['insert', 'cancel', 'dialogtitle', 'showvideo', 'iframe', 'thumbnail', 'link',
+        'newtab', 'inserttype'], 'atto_helixatto');
 }
 
 /**
  * Parses a list of module types and checks if they match the one we are in.
+ * @param string $param
  */
 function atto_helixatto_checklist($param) {
     global $PAGE, $DB;
@@ -48,7 +49,7 @@ function atto_helixatto_checklist($param) {
     for ($i = 0; $i < count($types); $i++) {
         $types[$i] = trim($types[$i]);
         if (strlen($types[$i]) > 0 && strpos($PAGE->pagetype, 'mod-'.$types[$i]) !== false &&
-            $DB->get_record('modules', array('name' => $types[$i]))) {
+            $DB->get_record('modules', ['name' => $types[$i]])) {
             return $types[$i];
         }
     }
@@ -56,19 +57,23 @@ function atto_helixatto_checklist($param) {
     return false;
 }
 
+/**
+ * Checkes if this supplied context has the MEDIAL filter enabled
+ * @param context $context
+ * @return boolean true if it does
+ */
 function atto_helixatto_has_filter($context = false) {
     if ($context !== false) {
         $filters = filter_get_active_in_context($context);
         if (array_key_exists('medial', $filters)) {
             return true;
         }
-    
         return false;
     }
 
     global $DB;
-    // If there is no context then we just need to know that the filter is active somewhere in Moodle
-    $rec = $DB->get_records('filter_active', array('filter' => 'medial', 'active' => 1));
+    // If there is no context then we just need to know that the filter is active somewhere in Moodle.
+    $rec = $DB->get_records('filter_active', ['filter' => 'medial', 'active' => 1]);
     if ($rec && count($rec) > 0) {
         return true;
     }
@@ -79,13 +84,16 @@ function atto_helixatto_has_filter($context = false) {
 
 /**
  * Return the js params required for this module.
+ * @param int $elementid
+ * @param object $options
+ * @param object $fpoptions
  * @return array of additional params to pass to javascript init function for this module.
  */
 function atto_helixatto_params_for_js($elementid, $options, $fpoptions) {
     global $USER, $COURSE, $CFG;
 
-    /**Switch of button when using the activity module.
-       Use PARAM_RAW type here in case "add" is used for something other than a plugin name in other parts of moodle**/
+    // Switch of button when using the activity module.
+    // Use PARAM_RAW type here in case "add" is used for something other than a plugin name in other parts of moodle.
     $add = optional_param("add", "none", PARAM_RAW);
     $action = optional_param("action", "none", PARAM_RAW);
 
@@ -93,7 +101,7 @@ function atto_helixatto_params_for_js($elementid, $options, $fpoptions) {
     $usercontextid = context_user::instance($USER->id)->id;
     $hasfilter = atto_helixatto_has_filter($coursecontext);
 
-    $params = array();
+    $params = [];
     $params['usercontextid'] = $usercontextid;
     $params['disabled'] = true;
     $params['modtype'] = "";

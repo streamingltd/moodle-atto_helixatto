@@ -24,29 +24,27 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
+$capabilities = [
 
-    'atto/helixatto:visible' => array(
+    'atto/helixatto:visible' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'coursecreator' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    'atto/helixatto:visiblemodtype' => array(
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+    'atto/helixatto:visiblemodtype' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'student' => CAP_ALLOW,
             'coursecreator' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-    )
-
-);
-
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+];

@@ -34,17 +34,17 @@
 var COMPONENTNAME = 'atto_helixatto';
 
 var TEMPLATE = '' +
-    '<form class=\"atto_form\">' +
-        '<div id="{{elementid}}_{{innerform}}" class="mdl-align" style=\"height:{{height}}px;\">' +
-            '<iframe id=\"medialiframe\" style=\"border:0px;margin:0px;background:#ffffff;width:100%;height:{{iheight}};\" ' +
-            'src=\"{{iframesrc}}\" allow=\"{{allow}}\"></iframe>' +
-            '<div class=\"{{hasfilter}}\">{{get_string "inserttype" component}} '+
-            '<select id=\"medial_insert_type\" name=\"medial_insert_type\" class=\"custom-select\">' +
-            '<option value=\"iframe\">{{get_string "iframe" component}}</option>' +
-            '<option value=\"thumbnail\">{{get_string "thumbnail" component}}</option>' +
-            '<option value=\"link\">{{get_string "link" component}}</option>' +
+    '<form class="atto_form">' +
+        '<div id="{{elementid}}_{{innerform}}" class="mdl-align" style="height:{{height}}px">' +
+            '<iframe id="medialiframe" style="border:0px;margin:0px;background:#ffffff;width:100%;height:{{iheight}};" ' +
+            'src="{{iframesrc}}" allow="{{allow}}"></iframe>' +
+            '<div class="{{hasfilter}}">{{get_string "inserttype" component}} ' +
+            '<select id="medial_insert_type" name="medial_insert_type" class="custom-select">' +
+            '<option value="iframe">{{get_string "iframe" component}}</option>' +
+            '<option value="thumbnail">{{get_string "thumbnail" component}}</option>' +
+            '<option value="link">{{get_string "link" component}}</option>' +
             '</select></div>' +
-            '<button id=\"medial_insert\" class=\"btn btn-secondary submit {{hidden}}\"> ' +
+            '<button id="medial_insert" class="btn btn-secondary submit {{hidden}}"> ' +
             '{{get_string "insert" component}}</button>' +
         '</div>' +
     '</form>';
@@ -74,7 +74,7 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
      */
     initializer: function() {
         // If we don't have the capability to view then give up.
-        if (this.get('disabled')){
+        if (this.get('disabled')) {
             return;
         }
 
@@ -89,16 +89,15 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
             callback: this._displayDialogue
         });
 
-        
         window.addEventListener("message", this._receiveMessage, false);
-        
+
         hmlLaunchURL = this.get('baseurl') + "/mod/helixmedia/launch.php";
         if (this.get('placeholder') == 1) {
             embedLaunchURL = "{{{medial_launch_base}}}/mod/helixmedia/launch.php";
         } else {
             embedLaunchURL = hmlLaunchURL;
         }
-        
+
         ltiurl = this.get('ltiurl');
         // The interval timer doesn't seem to get the right scope for "this" to work inside _checkStatus, so set a global var here.
         buttonInstance = this;
@@ -108,10 +107,12 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
      * Listener for the helix selection complete event.
      **/
     _receiveMessage: function(event) {
-        var i = event.data.indexOf("preid_");
-        if (i == 0) {
-            preid = event.data.substring(6);
-            interval = setTimeout(buttonInstance._checkStatus, 5000);
+        if (typeof event.data === 'string' || event.data instanceof String) {
+            var i = event.data.indexOf("preid_");
+            if (i == 0) {
+                preid = event.data.substring(6);
+                interval = setTimeout(buttonInstance._checkStatus, 5000);
+            }
         }
     },
 
@@ -127,11 +128,11 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
 
         var params = "resource_link_id=" + preid + "&user_id=" + buttonInstance.get('userid') +
             "&oauth_consumer_key=" + buttonInstance.get('oauthConsumerKey');
-        xmlDoc.open("POST", buttonInstance.get('statusurl') , false);
-        xmlDoc.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        xmlDoc.open("POST", buttonInstance.get('statusurl'), false);
+        xmlDoc.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xmlDoc.send(params);
 
-        if (dialogueInstance != null && dialogueInstance.get("visible") == false) {
+        if (dialogueInstance !== null && dialogueInstance.get("visible") == false) {
             gotIn = false;
             return;
         }
@@ -146,7 +147,6 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
         } else {
             interval = setTimeout(buttonInstance._checkStatus, 2000);
         }
-
     },
 
      /**
@@ -174,7 +174,7 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
 
         dwidth = width;
         dheight = height;
-        
+
         dialogueInstance = this.getDialogue({
             headerContent: M.util.get_string('dialogtitle', COMPONENTNAME),
             width: width + 'px',
@@ -185,14 +185,14 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
         });
 
         // Dialog doesn't detect changes in width without this - if you reuse the dialog, this seems necessary.
-        if(dialogueInstance.width !== width + 'px'){
+        if (dialogueInstance.width !== width + 'px') {
             dialogueInstance.set('width', width + 'px');
         }
 
         // Append launch code
         var hidden = '';
         var iheight = '100%';
-        if(buttonInstance.get('hideinsert') == "1") {
+        if (buttonInstance.get('hideinsert') == "1") {
             hidden = "hidden";
         }
 
@@ -233,10 +233,10 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
                 elementid: this.get('host').get('elementid'),
                 component: COMPONENTNAME,
                 iframesrc: hmlLaunchURL + "?type=15&modtype=" + this.get('modtype'),
-                allow: 'microphone ' + ltiurl + '; camera ' + ltiurl + '; display-capture '+ ltiurl + ';',
-                width:dwidth - 30,
-                height:dheight - 90,
-                style:"border:0px;",
+                allow: 'microphone ' + ltiurl + '; camera ' + ltiurl + '; display-capture ' + ltiurl + ';',
+                width: dwidth - 30,
+                height: dheight - 90,
+                style: "border:0px;",
                 hidden: hidden,
                 iheight: iheight,
                 hasfilter: hasfilter
@@ -254,8 +254,8 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
      * @private
      */
 
-    _doInsert : function(e){
-        if (typeof(e) != "undefined") {
+    _doInsert: function(e) {
+        if (typeof e != "undefined") {
             e.preventDefault();
         }
 
@@ -267,20 +267,17 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
 
         var xmlDoc = new XMLHttpRequest();
         var params = "resource_link_id=" + preid + "&user_id=" + buttonInstance.get('userid') +
-            "&oauth_consumer_key=" + buttonInstance.get('oauthConsumerKey') + 
-            "&context_id="+ buttonInstance.get('course') + 
+            "&oauth_consumer_key=" + buttonInstance.get('oauthConsumerKey') +
+            "&context_id=" + buttonInstance.get('course') +
             "&include_height=Y";
 
         xmlDoc.onload = function(response) {
             if (xmlDoc.status >= 200 && xmlDoc.status < 400) {
                 var resp = xmlDoc.responseText.split(':');
-                console.log("playersize data");
-                console.log(resp);
                 var audioonly = 0;
                 if (resp.length == 3 && resp[2] == 'Y') {
                     audioonly = 1;
                 }
-                console.log("audioonly="+audioonly);
 
                 var inserttype = 'iframe';
                 var it = document.getElementById('medial_insert_type');
@@ -291,15 +288,18 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
                 inserted = true;
                 obj.editor.focus();
 
-                var url = embedLaunchURL + "?type=16&responsive=1&medialembed="+inserttype+"&audioonly="+audioonly+"&l=" + preid;
+                var url = embedLaunchURL + "?type=16&responsive=1&medialembed=" + inserttype + "&audioonly=" +
+                    audioonly + "&l=" + preid;
                 var html = "";
                 if (obj.get('linkonly') || inserttype != 'iframe') {
                     html = "<a href='" + url + "' target='_blank'>" + M.util.get_string('showvideo', COMPONENTNAME) + "</a>";
                 } else {
                     if (audioonly == 1) {
-                        html = "<div class='embed-responsive helixmedia_embedheight' style='height:100px' id='mediallaunch-" + preid+ "'>";
+                        html = "<div class='embed-responsive helixmedia_embedheight' style='height:100px' id='mediallaunch-" +
+                            preid + "'>";
                     } else {
-                        html = "<div class='embed-responsive embed-responsive-16by9 helixmedia_embedheight' id='mediallaunch-" + preid+ "'>";
+                        html = "<div class='embed-responsive embed-responsive-16by9 helixmedia_embedheight' id='mediallaunch-" +
+                            preid + "'>";
                     }
 
                     html += "<iframe class='embed-responsive-item overflow-auto border-0' " +
@@ -307,19 +307,13 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
                         "mozallowfullscreen='true'></iframe></div>";
                 }
 
-
-                console.log(html);
-                console.log(obj.get('host'));
-
                 obj.get('host').insertContentAtFocusPoint(html);
                 obj.markUpdated();
-                console.log("hide dialog");
                 dialogueInstance.hide();
             }
         };
-        console.log(buttonInstance.get('playersizeurl'));
-        xmlDoc.open("POST", buttonInstance.get('playersizeurl') , true);
-        xmlDoc.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        xmlDoc.open("POST", buttonInstance.get('playersizeurl'), true);
+        xmlDoc.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xmlDoc.send(params);
     }
 },
@@ -359,7 +353,7 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
             value: ''
         },
         placeholder: {
-            value: false   
+            value: false
         },
         playersizeurl: {
             value: ''
