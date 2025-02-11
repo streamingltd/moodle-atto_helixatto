@@ -108,7 +108,8 @@ jobs:
 
       - name: Grunt
         if: ${{ !cancelled() }}
-        run: moodle-plugin-ci grunt --max-lint-warnings 0
+        # Only run stylelint task for grunt/yui, the build always fails in github, you need to use the local shifter.
+        run: moodle-plugin-ci grunt --max-lint-warnings 0  --tasks=stylelint
 
       - name: PHPUnit tests
         if: ${{ !cancelled() }}
