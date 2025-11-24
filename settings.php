@@ -23,18 +23,20 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->dirroot."/lib/editor/atto/plugins/helixatto/lib.php");
+require_once($CFG->dirroot . "/lib/editor/atto/plugins/helixatto/lib.php");
 
 $ADMIN->add('editoratto', new admin_category('atto_helixatto', new lang_string('pluginname', 'atto_helixatto')));
 
 $settings = new admin_settingpage('atto_helixatto_settings', new lang_string('settings', 'atto_helixatto'));
 if ($ADMIN->fulltree) {
     $options = [0 => new lang_string("no"), 1 => new lang_string("yes")];
-    $hidesetting = new admin_setting_configselect('atto_helixatto/hideinsert',
-                                              new lang_string('hideinsert', 'atto_helixatto'),
-                                              new lang_string('hideinsert_desc', 'atto_helixatto'),
-                                              1,
-                                              $options);
+    $hidesetting = new admin_setting_configselect(
+        'atto_helixatto/hideinsert',
+        new lang_string('hideinsert', 'atto_helixatto'),
+        new lang_string('hideinsert_desc', 'atto_helixatto'),
+        1,
+        $options
+    );
     $settings->add($hidesetting);
 
     $options = [0 => new lang_string("no")];
@@ -42,23 +44,37 @@ if ($ADMIN->fulltree) {
         $options[1] = new lang_string("yes");
     }
 
-    $hidesetting = new admin_setting_configselect('atto_helixatto/placeholder',
-                                              new lang_string('placeholder', 'atto_helixatto'),
-                                              new lang_string('placeholder_desc', 'atto_helixatto'),
-                                              0,
-                                              $options);
+    $hidesetting = new admin_setting_configselect(
+        'atto_helixatto/placeholder',
+        new lang_string('placeholder', 'atto_helixatto'),
+        new lang_string('placeholder_desc', 'atto_helixatto'),
+        0,
+        $options
+    );
     $settings->add($hidesetting);
 
-    $settings->add(new admin_setting_configtextarea('atto_helixatto/modtypeperm', get_string("modtypetitle", "atto_helixatto"),
-                   get_string("modtypedesc", "atto_helixatto"), "", PARAM_TEXT));
+    $settings->add(new admin_setting_configtextarea(
+        'atto_helixatto/modtypeperm',
+        get_string("modtypetitle", "atto_helixatto"),
+        get_string("modtypedesc", "atto_helixatto"),
+        "",
+        PARAM_TEXT
+    ));
 
-    $settings->add(new admin_setting_configtextarea('atto_helixatto/uselinkdesc', get_string("uselinktitle", "atto_helixatto"),
-                   get_string("uselinkdesc", "atto_helixatto"), "forum\r\nworkshop", PARAM_TEXT));
+    $settings->add(new admin_setting_configtextarea(
+        'atto_helixatto/uselinkdesc',
+        get_string("uselinktitle", "atto_helixatto"),
+        get_string("uselinkdesc", "atto_helixatto"),
+        "forum\r\nworkshop",
+        PARAM_TEXT
+    ));
 
-    $embedopt = new admin_setting_configselect('atto_helixatto/embedopt',
-                                              new lang_string('embedopt', 'atto_helixatto'),
-                                              new lang_string('embedopt_desc', 'atto_helixatto'),
-                                              0,
-                                              $options);
+    $embedopt = new admin_setting_configselect(
+        'atto_helixatto/embedopt',
+        new lang_string('embedopt', 'atto_helixatto'),
+        new lang_string('embedopt_desc', 'atto_helixatto'),
+        0,
+        $options
+    );
     $settings->add($embedopt);
 }

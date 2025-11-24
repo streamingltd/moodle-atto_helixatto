@@ -24,8 +24,8 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->dirroot.'/mod/helixmedia/locallib.php');
-require_once($CFG->dirroot.'/lib/filterlib.php');
+require_once($CFG->dirroot . '/mod/helixmedia/locallib.php');
+require_once($CFG->dirroot . '/lib/filterlib.php');
 
 /**
  * Initialise this plugin
@@ -35,7 +35,10 @@ function atto_helixatto_strings_for_js() {
 
     $PAGE->requires->strings_for_js(
         ['insert', 'cancel', 'dialogtitle', 'showvideo', 'iframe', 'thumbnail', 'link',
-        'newtab', 'inserttype'], 'atto_helixatto');
+        'newtab',
+        'inserttype'],
+        'atto_helixatto'
+    );
 }
 
 /**
@@ -48,8 +51,10 @@ function atto_helixatto_checklist($param) {
     $types = explode("\n", $config);
     for ($i = 0; $i < count($types); $i++) {
         $types[$i] = trim($types[$i]);
-        if (strlen($types[$i]) > 0 && strpos($PAGE->pagetype, 'mod-'.$types[$i]) !== false &&
-            $DB->get_record('modules', ['name' => $types[$i]])) {
+        if (
+            strlen($types[$i]) > 0 && strpos($PAGE->pagetype, 'mod-' . $types[$i]) !== false &&
+            $DB->get_record('modules', ['name' => $types[$i]])
+        ) {
             return $types[$i];
         }
     }
@@ -90,12 +95,7 @@ function atto_helixatto_has_filter($context = false) {
  * @return array of additional params to pass to javascript init function for this module.
  */
 function atto_helixatto_params_for_js($elementid, $options, $fpoptions) {
-    global $USER, $COURSE, $CFG;
-
-    // Switch of button when using the activity module.
-    // Use PARAM_RAW type here in case "add" is used for something other than a plugin name in other parts of moodle.
-    $add = optional_param("add", "none", PARAM_RAW);
-    $action = optional_param("action", "none", PARAM_RAW);
+    global $USER, $COURSE, $CFG, $PAGE;
 
     $coursecontext = context_course::instance($COURSE->id);
     $usercontextid = context_user::instance($USER->id)->id;
@@ -134,16 +134,37 @@ function atto_helixatto_params_for_js($elementid, $options, $fpoptions) {
         }
     }
 
-    if ($add == "helixmedia" || $action == "grader" || $action == "grade") {
-        $params['disabled'] = true;
+    // This hides the button in specific situations where we want people to use the plugin, eg in the MEDIAL activity
+    // and the assign grading interface where we want people to use Feedback.
+    if ($PAGE->cm) {
+        switch ($PAGE->cm->modname) {
+            case "helixmedia":
+                $params['disabled'] = true;
+                break;
+            case "assign":
+                $action = $PAGE->url->get_param("action");
+                if (($action == "grader" || $action == "grade" ) && !get_config('tiny_medial', 'allowfeedback')) {
+                    $params['disabled'] = true;
+                }
+                break;
+        }
+    } else {
+        // Object $PAGE->cm is false when adding a new instance, so check the URL and see if we're adding a MEDIAL activity.
+        if ($PAGE->url->get_path() == "/course/modedit.php" && $PAGE->url->get_param("add") == "helixmedia") {
+            $params['disabled'] = true;
+        }
     }
 
     $params['baseurl'] = $CFG->wwwroot;
-    $params['ltiurl'] = get_config("helixmedia", "launchurl");
+    $params['ltiurl'] = helixmedial_launch_url();
     $params['statusurl'] = helixmedia_get_status_url();
     $params['userid'] = $USER->id;
     $params['insertdelay'] = get_config('helixmedia', 'modal_delay');
-    $params['oauthConsumerKey'] = get_config('helixmedia', 'consumer_key');
+    if (get_config('helixmedia', 'ltiversion') == LTI_VERSION_1) {
+        $params['oauthConsumerKey'] = get_config('helixmedia', 'consumer_key');
+    } else {
+        $params['oauthConsumerKey'] = false;
+    }
     if ($params['insertdelay'] > -1) {
         $params['hideinsert'] = get_config('atto_helixatto', 'hideinsert');
     } else {
@@ -162,4 +183,3 @@ function atto_helixatto_params_for_js($elementid, $options, $fpoptions) {
     }
     return $params;
 }
-

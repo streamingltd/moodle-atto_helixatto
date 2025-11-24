@@ -111,10 +111,17 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
     _receiveMessage: function(event) {
         if (typeof event.data === 'string' || event.data instanceof String) {
             var i = event.data.indexOf("preid_");
-            if (i == 0) {
+            if (i === 0) {
                 preid = event.data.substring(6);
-                interval = setTimeout(buttonInstance._checkStatus, 5000);
+                if (buttonInstance.get('oauthConsumerKey')) {
+                    interval = setTimeout(buttonInstance._checkStatus, 5000);
+                }
             }
+        }
+
+        // Return data for LTI 1.3
+        if (typeof event.data === 'object') {
+            buttonInstance._setCustomLink(event.data);
         }
     },
 
@@ -134,7 +141,7 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
         xmlDoc.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xmlDoc.send(params);
 
-        if (dialogueInstance !== null && dialogueInstance.get("visible") == false) {
+        if (dialogueInstance !== null && dialogueInstance.get("visible") === false) {
             gotIn = false;
             return;
         }
@@ -143,7 +150,7 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
             gotIn = true;
         }
 
-        if (xmlDoc.responseText == "OUT" && gotIn == true) {
+        if (xmlDoc.responseText == "OUT" && gotIn === true) {
                 gotIn = false;
                 buttonInstance._doInsert();
         } else {
@@ -273,7 +280,7 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
             "&context_id=" + buttonInstance.get('course') +
             "&include_height=Y";
 
-        xmlDoc.onload = function(response) {
+        xmlDoc.onload = function() {
             if (xmlDoc.status >= 200 && xmlDoc.status < 400) {
                 var resp = xmlDoc.responseText.split(':');
                 var audioonly = 0;
@@ -281,43 +288,80 @@ Y.namespace('M.atto_helixatto').Button = Y.Base.create('button', Y.M.editor_atto
                     audioonly = 1;
                 }
 
-                var inserttype = 'iframe';
-                var it = document.getElementById('medial_insert_type');
-                if (it) {
-                    inserttype = it.value;
-                }
-
-                inserted = true;
-                obj.editor.focus();
-
-                var url = embedLaunchURL + "?type=16&responsive=1&medialembed=" + inserttype + "&audioonly=" +
-                    audioonly + "&l=" + preid;
-                var html = "";
-                if (obj.get('linkonly') || inserttype != 'iframe') {
-                    html = "<a href='" + url + "' target='_blank'>" + M.util.get_string('showvideo', COMPONENTNAME) + "</a>";
-                } else {
-                    if (audioonly == 1) {
-                        html = "<div class='embed-responsive helixmedia_embedheight' style='height:100px' id='mediallaunch-" +
-                            preid + "'>";
-                    } else {
-                        html = "<div class='embed-responsive embed-responsive-16by9 helixmedia_embedheight' id='mediallaunch-" +
-                            preid + "'>";
-                    }
-
-                    html += "<iframe class='embed-responsive-item overflow-auto border-0' " +
-                        "src='" + url + "' allowfullscreen='true' webkitallowfullscreen='true' " +
-                        "mozallowfullscreen='true'></iframe></div>";
-                }
-
-                obj.get('host').insertContentAtFocusPoint(html);
-                obj.markUpdated();
-                dialogueInstance.hide();
+                obj._setLink(audioonly, "", false);
             }
         };
         xmlDoc.open("POST", buttonInstance.get('playersizeurl'), true);
         xmlDoc.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xmlDoc.send(params);
+    },
+
+    /**
+     * Read LTI 1.3 custom data to create a link
+     * @method _setCustomLink
+     * @private
+     */
+    _setCustomLink: function(data) {
+        if (!('title' in data) || !('custom' in data) || !('audioonly' in data.custom)) {
+            /* eslint-disable no-console */
+            console.log("Bad message data");
+            console.log(data);
+            /* eslint-enable no-console */
+            return;
+        }
+
+        // The custom data uses strings for everything becase the spec doesn't allow for other types.
+        var audioonly = 0;
+        if (data.custom.audioonly.toLowerCase() === "true") {
+            audioonly = 1;
+        }
+
+        buttonInstance._setLink(audioonly, data.title, data.custom.video_ref);
+     },
+
+    /**
+     * Creates a link to insert into the html
+     * @method _setLink
+     * @private
+     */
+    _setLink: function(audioonly, title, videoref) {
+        var inserttype = 'iframe';
+        var it = document.getElementById('medial_insert_type');
+        if (it) {
+            inserttype = it.value;
+        }
+
+        inserted = true;
+        buttonInstance.editor.focus();
+
+        var url = embedLaunchURL + "?type=16&responsive=1&medialembed=" + inserttype + "&audioonly=" +
+            audioonly + "&l=" + preid;
+        if (videoref) {
+            url += "&video_ref=" + videoref;
+        }
+        var html = "";
+        if (buttonInstance.get('linkonly') || inserttype != 'iframe') {
+            html = "<a href='" + url + "' title='" + title + "' target='_blank'>" +
+                M.util.get_string('showvideo', COMPONENTNAME) + "</a>";
+        } else {
+            if (audioonly == 1) {
+                html = "<div class='embed-responsive helixmedia_embedheight' style='height:100px' id='mediallaunch-" +
+                    preid + "'>";
+            } else {
+                html = "<div class='embed-responsive embed-responsive-16by9 helixmedia_embedheight' id='mediallaunch-" +
+                    preid + "'>";
+            }
+
+            html += "<iframe class='embed-responsive-item overflow-auto border-0' " +
+                "src='" + url + "' allowfullscreen='true' webkitallowfullscreen='true' " +
+                "mozallowfullscreen='true'></iframe></div>";
+        }
+
+        buttonInstance.get('host').insertContentAtFocusPoint(html);
+        buttonInstance.markUpdated();
+        dialogueInstance.hide();
     }
+
 },
 {
     ATTRS: {

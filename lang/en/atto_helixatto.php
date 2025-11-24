@@ -44,6 +44,7 @@ $string['nothingtoinsert'] = 'Nothing to insert!';
 $string['placeholder'] = 'Use placeholder URL (requires MEDIAL filter)';
 $string['placeholder_desc'] = 'Use a placeholder for the MEDIAL Launch URL instead of the actual URL. This avoids broken links if your site URL changes but <span style="font-weight:bold">requires the MEDIAL filter plugin to be installed and active</span> to work. Activating this setting will cause a link to be used in preference to an iframe in all cases for compatibiltiy with the editing mode, so the "Use a link to the MEDIAL resource" settings will be ignored. Also, since the filter does not act on the editor itself, the MEDIAL links will be broken when used in the ATTO editor and will only work on the final page.';
 $string['pluginname'] = 'MEDIAL';
+$string['privacy:metadata'] = 'The atto_helixatto plugin does not store any personal data.';
 $string['settings'] = 'MEDIAL';
 $string['showvideo'] = 'View MEDIAL video';
 $string['thumbnail'] = 'Thumbnail + Popup Video';
